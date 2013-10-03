@@ -18,7 +18,7 @@ public class MainActivity extends Activity {
 		ActionBar actionBar = getActionBar();
 		actionBar.setHomeButtonEnabled(true);
 		
-		Fragment newFragment = new AppListFragment();  
+		Fragment newFragment = new ConnsListFragment();  
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();  
 		  
 		transaction.replace(R.id.container, newFragment);  
