@@ -3,6 +3,7 @@
 
     <string name="app_name">RailsClient</string>
     <string name="action_settings">Settings</string>
+    <string name="action_add">Add new item</string>
     <string name="hello_world">Hello world!</string>
 
 </resources>
