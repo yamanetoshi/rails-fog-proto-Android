@@ -1,20 +1,25 @@
 package jp.shuri.railsclient;
 
+import android.app.ActionBar;
+import android.app.Activity;
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
-
 
 public class ConnsListFragment extends ListFragment {
+	
+    public interface OnConnectionSelectedListener {  
+        public void onConnectionSelected(int position);
+    }  
+    
+    OnConnectionSelectedListener mListener;  
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -24,6 +29,9 @@ public class ConnsListFragment extends ListFragment {
 	@Override
 	  public void onActivityCreated(Bundle savedInstanceState) {
 	    super.onActivityCreated(savedInstanceState);
+	    
+        ActionBar actionBar = getActivity().getActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(false);
 
 	    String [] strArray = { "hoge", "fuga", "piyo", "fugahoge", "hogefuga",
 	    						"abcdefg", "hijklmn", "opqrstu", "vwxyzzz",
@@ -31,7 +39,7 @@ public class ConnsListFragment extends ListFragment {
 	    						"charity", "kids sports", "time to chill"};
 	    
 	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-	    		  R.layout.list_item_card, R.id.title);
+	    		  R.layout.list_item_card, R.id.conns_title);
 
 	    for (String str : strArray) {
 	        adapter.add(str);
@@ -51,31 +59,44 @@ public class ConnsListFragment extends ListFragment {
 	    
 	    setListAdapter(adapter);
 	    
-	    listView.setOnItemClickListener(new OnItemClickListener() {
+	    getListView().setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				Toast.makeText(getActivity(), "list item clicked (" + position + ")", Toast.LENGTH_SHORT).show();
+				mListener.onConnectionSelected(position);
+//				Toast.makeText(getActivity(), "list item clicked (" + position + ")", Toast.LENGTH_SHORT).show();
 			}
 	    	
 	    });
 	}
 
 	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-//		menu.add(Menu.NONE, R.id.action_add, Menu.NONE, "New Connection").setShowAsAction(
-//				MenuItem.SHOW_AS_ACTION_IF_ROOM);
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-        	case R.id.action_add:
-        		Toast.makeText(getActivity(), "add button from ConnsListFragment", Toast.LENGTH_SHORT).show();
+        	case android.R.id.home:
+        		getActivity().finish();
         		return true;
         	default:
         		return super.onOptionsItemSelected(item);
         }
+	}
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		
+        try {  
+            mListener = (OnConnectionSelectedListener) activity;  
+        } catch (ClassCastException e) {  
+            throw new ClassCastException(activity.toString() + " must implement OnConnectionSelectedListener");  
+        }  
+
+	}
+
+	@Override
+	public void onDestroyView() {
+		super.onDestroyView();
+		setListAdapter(null);
 	}
 }
