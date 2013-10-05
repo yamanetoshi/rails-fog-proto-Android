@@ -5,11 +5,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -30,12 +30,6 @@ public class ConnsListFragment extends ListFragment {
 	
 	private ArrayAdapter<String> mAdapter;
 	private Handler mHandler = new Handler();
-	
-    public interface OnConnectionSelectedListener {  
-        public void onConnectionSelected(int position);
-    }  
-    
-    OnConnectionSelectedListener mListener;  
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -46,6 +40,13 @@ public class ConnsListFragment extends ListFragment {
 	@Override
 	  public void onActivityCreated(Bundle savedInstanceState) {
 	    super.onActivityCreated(savedInstanceState);
+		
+		if (getParent().getPref().getString("login_account", "").equals("")) {
+			Toast.makeText(getParent(), "アカウント未設定です", Toast.LENGTH_LONG).show();
+			Intent i = new Intent(getParent(), PActivity.class);
+			startActivity(i);
+			return;
+		}
 	    
         ActionBar actionBar = getActivity().getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(false);
@@ -67,8 +68,6 @@ public class ConnsListFragment extends ListFragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-				
-//				Toast.makeText(getParent(), "Conns list item clicked (" + id + ")", Toast.LENGTH_SHORT).show();
 				Fragment newFragment = new VMListFragment();
 				
 				Bundle args = new Bundle();
@@ -81,9 +80,6 @@ public class ConnsListFragment extends ListFragment {
 				transaction.addToBackStack(null);  
 				  
 				transaction.commit(); 		
-
-//				mListener.onConnectionSelected(position);
-//				Toast.makeText(getActivity(), "list item clicked (" + position + ")", Toast.LENGTH_SHORT).show();
 			}
 	    	
 	    });
@@ -96,22 +92,6 @@ public class ConnsListFragment extends ListFragment {
 	}
 	
 	private void setConnsListAdapter() {
-		/*
-           String [] strArray = { "hoge", "fuga", "piyo", "fugahoge", "hogefuga",
-                                                       "abcdefg", "hijklmn", "opqrstu", "vwxyzzz",
-                                                       "mushroom sause", "food education", 
-                                                       "charity", "kids sports", "time to chill"};
-           
-           ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-                         R.layout.list_item_card, R.id.conns_title);
-
-           for (String str : strArray) {
-               adapter.add(str);
-           }
-           
-           setListAdapter(adapter);
-		 */
-		
 		FragmentManager manager = getFragmentManager();  
         final MyProgressDialog pDialog = new MyProgressDialog();  
         pDialog.show(manager, "dialog");  
@@ -171,18 +151,6 @@ public class ConnsListFragment extends ListFragment {
         	default:
         		return super.onOptionsItemSelected(item);
         }
-	}
-
-	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		
-        try {  
-            mListener = (OnConnectionSelectedListener) activity;  
-        } catch (ClassCastException e) {  
-            throw new ClassCastException(activity.toString() + " must implement OnConnectionSelectedListener");  
-        }  
-
 	}
 
 	@Override
