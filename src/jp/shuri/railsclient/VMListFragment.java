@@ -203,7 +203,8 @@ public class VMListFragment extends ListFragment {
 
                 return true;
         	case RELOAD_ID:
-        		Toast.makeText(getActivity(), "reload button from VMListFragment", Toast.LENGTH_SHORT).show();
+        		setListAdapter(null);
+        		setVMsListAdapter();
         		return true;
         	default:
         		return super.onOptionsItemSelected(item);
