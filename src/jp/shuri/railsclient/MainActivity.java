@@ -5,6 +5,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -41,9 +42,8 @@ public class MainActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
             switch(item.getItemId()) {
                     case R.id.action_settings:
-                            Toast.makeText(this, "setting button", Toast.LENGTH_SHORT).show();
-//                            Intent i = new Intent(this, SCPreferences.class);
-//                            startActivity(i);
+                            Intent i = new Intent(this, PActivity.class);
+                            startActivity(i);
                             return true;
                     default:
                             return super.onOptionsItemSelected(item);

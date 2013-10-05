@@ -5,5 +5,17 @@
     <string name="action_settings">Settings</string>
     <string name="action_add">Add new item</string>
     <string name="hello_world">Hello world!</string>
+    
+    <string name="preferences_screen">設定</string>
+    <string name="login_preferences">ログイン情報</string>
+    
+    <string name="title_login_account">ログインアカウント</string>
+    <string name="summary_login_account">ログインアカウント</string>
+    <string name="dialogtitle_login_account">ログインアカウントを入力してください</string>
+    
+    <string name="title_login_password">パスワード</string>
+    <string name="summary_login_password">パスワード</string>
+    <string name="dialogtitle_login_password">パスワードを入力してください</string>
+        
 
 </resources>
