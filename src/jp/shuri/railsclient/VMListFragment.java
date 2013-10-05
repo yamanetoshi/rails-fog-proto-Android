@@ -1,5 +1,9 @@
 package jp.shuri.railsclient;
 
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -8,6 +12,7 @@ import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +25,16 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class VMListFragment extends ListFragment {
+	private Handler mHandler = new Handler();
+	private int mIndex;
+	
+	ArrayAdapter<String> mAdapter;
+	
+	private MainActivity getParent() { return ((MainActivity)getActivity()); }
+
+	private JSONObject mConn = null;
+	private JSONObject mVMs = null;
+	
 	private final int RELOAD_ID = 0xdeadbeef;
 	private final int ADD_ID = 0xdeadbeef + 1;
 	
@@ -76,21 +91,13 @@ public class VMListFragment extends ListFragment {
 	@Override
 	  public void onActivityCreated(Bundle savedInstanceState) {
 	    super.onActivityCreated(savedInstanceState);
+	    
+	    Bundle args = getArguments();
+        mIndex = args.getInt("pos");
+        Toast.makeText(getActivity(), "selected : " + mIndex, Toast.LENGTH_SHORT).show();
 
 	    ActionBar actionBar = getActivity().getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-
-	    String [] strArray = { "hoge", "fuga", "piyo", "fugahoge", "hogefuga",
-	    						"abcdefg", "hijklmn", "opqrstu", "vwxyzzz",
-	    						"mushroom sause", "food education", 
-	    						"charity", "kids sports", "time to chill"};
-	    
-	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
-	    		  R.layout.vm_list_item_card, R.id.vm_title);
-
-	    for (String str : strArray) {
-	        adapter.add(str);
-	    }
 	    
 	    int padding = (int) (getResources().getDisplayMetrics().density * 8); // 8dip
 	    ListView listView = getListView();
@@ -104,8 +111,6 @@ public class VMListFragment extends ListFragment {
 	    listView.addHeaderView(header, null, false);
 	    listView.addFooterView(footer, null, false);
 	    
-	    setListAdapter(adapter);
-	    
 	    getListView().setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
@@ -117,6 +122,78 @@ public class VMListFragment extends ListFragment {
 			}
 	    	
 	    });
+	    
+	    setVMsListAdapter();
+	}
+	
+	private void setVMsListAdapter() {
+		/*
+	    String [] strArray = { "hoge", "fuga", "piyo", "fugahoge", "hogefuga",
+	    						"abcdefg", "hijklmn", "opqrstu", "vwxyzzz",
+	    						"mushroom sause", "food education", 
+	    						"charity", "kids sports", "time to chill"};
+	    
+	    mAdapter = new ArrayAdapter<String>(getActivity(),
+	    		  R.layout.vm_list_item_card, R.id.vm_title);
+
+	    for (String str : strArray) {
+	        mAdapter.add(str);
+	    }
+	    
+	    setListAdapter(mAdapter);
+	    */
+		
+		FragmentManager manager = getFragmentManager();  
+        final MyProgressDialog pDialog = new MyProgressDialog();  
+        pDialog.show(manager, "dialog");  
+        
+        new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (getParent().getAuthToken().equals("")) {
+					getParent().setAuthToken();
+				}
+				
+				String url = getParent().getURL() + 
+						"/vm_operations/" + mIndex + ".json?auth_token=" + 
+						getParent().getAuthToken();
+                try {
+                	String str = JSONFunctions.GETfromURL(url, new DefaultHttpClient());
+                	JSONObject obj = new JSONObject(str);
+                	mConn = obj.getJSONObject("conn");
+                	mVMs = obj.getJSONObject("vms");
+                	JSONArray tmpArray = mVMs.getJSONObject("listvirtualmachinesresponse")
+                							.getJSONArray("virtualmachine");
+            	    
+            	    mAdapter = new ArrayAdapter<String>(getActivity(),
+            	    		  R.layout.vm_list_item_card, R.id.vm_title);
+
+                	for (int i = 0; i < tmpArray.length(); i++) {
+                		JSONObject e = tmpArray.getJSONObject(i);
+                		mAdapter.add(e.getString("displayname"));
+                	}
+
+                	mHandler.post(new Runnable() {
+
+						@Override
+						public void run() {
+		                	setListAdapter(mAdapter);
+						}
+                		
+                	});
+        			
+                	pDialog.dismiss();
+                } catch (Exception e) {
+                	e.printStackTrace();
+
+            		FragmentManager manager = getFragmentManager();  
+                    final MyExceptionDialog dialog = new MyExceptionDialog();  
+                    dialog.show(manager, "dialog");                  	
+                }
+
+			}
+        }).start();
 	}
 
 	@Override
