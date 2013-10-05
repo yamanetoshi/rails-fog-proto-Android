@@ -8,6 +8,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.app.ActionBar;
 import android.app.Activity;
@@ -26,8 +27,13 @@ public class MainActivity extends Activity
 	private SharedPreferences mPref;
 	protected SharedPreferences getPref() { return mPref; }
 	
-	private String mAuthToken;
+	private String mAuthToken = "";
 	protected String getAuthToken() { return mAuthToken; }
+	
+	private final String mURL = "http://cryptic-eyrie-8923.herokuapp.com";
+	protected String getURL() { return mURL; }
+	
+	private ConnsListFragment mConnsListFragment = new ConnsListFragment();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,46 +47,30 @@ public class MainActivity extends Activity
 		actionBar.setHomeButtonEnabled(true);
 		
 		if(null == savedInstanceState){
-			Fragment newFragment = new ConnsListFragment();  
-			FragmentTransaction transaction = getFragmentManager().beginTransaction();  
-		  
-			transaction.replace(R.id.container, newFragment);  
-		  
+			FragmentTransaction transaction = getFragmentManager().beginTransaction();
+			transaction.replace(R.id.container, mConnsListFragment);  
 			transaction.commit();
-			
-			loginProc();
 		}
 	}
 	
-	private void loginProc() {
-		FragmentManager manager = getFragmentManager();  
-        final MyProgressDialog pDialog = new MyProgressDialog();  
-        pDialog.show(manager, "dialog");  
-        
-        new Thread(new Runnable() {
+	protected void setAuthToken() {
+		ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("email", mPref.getString("login_account", "")));
+		params.add(new BasicNameValuePair("password", mPref.getString("login_password", "")));
 
-			@Override
-			public void run() {
-				ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-                params.add(new BasicNameValuePair("email", mPref.getString("login_account", "")));
-                params.add(new BasicNameValuePair("password", mPref.getString("login_password", "")));
-                
-                String url = "http://cryptic-eyrie-8923.herokuapp.com/api/users/sign_in";
-                
-                try {
-                	String str = JSONFunctions.POSTfromURL(url, new DefaultHttpClient(), params);
-                	JSONObject obj = new JSONObject(str);
-                	mAuthToken = obj.getString("auth_token");
-                	pDialog.dismiss();
-                } catch (Exception e) {
-                	e.printStackTrace();
+		String url = mURL + "/api/users/sign_in";
 
-            		FragmentManager manager = getFragmentManager();  
-                    final MyExceptionDialog dialog = new MyExceptionDialog();  
-                    dialog.show(manager, "dialog");                  	
-                }
-			}
-        }).start();
+		try {
+			String str = JSONFunctions.POSTfromURL(url, new DefaultHttpClient(), params);
+			JSONObject obj = new JSONObject(str);
+			mAuthToken = obj.getString("auth_token");
+		} catch (Exception e) {
+			e.printStackTrace();
+
+			FragmentManager manager = getFragmentManager();  
+			final MyExceptionDialog dialog = new MyExceptionDialog();  
+			dialog.show(manager, "dialog");                  	
+		}
 	}
 
 	@Override
