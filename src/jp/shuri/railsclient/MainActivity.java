@@ -8,11 +8,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
@@ -21,8 +19,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class MainActivity extends Activity 
-	implements ConnsListFragment.OnConnectionSelectedListener {
+public class MainActivity extends Activity {
 	
 	private SharedPreferences mPref;
 	protected SharedPreferences getPref() { return mPref; }
@@ -33,8 +30,6 @@ public class MainActivity extends Activity
 	private final String mURL = "http://cryptic-eyrie-8923.herokuapp.com";
 	protected String getURL() { return mURL; }
 	
-	private ConnsListFragment mConnsListFragment = new ConnsListFragment();
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -48,7 +43,7 @@ public class MainActivity extends Activity
 		
 		if(null == savedInstanceState){
 			FragmentTransaction transaction = getFragmentManager().beginTransaction();
-			transaction.replace(R.id.container, mConnsListFragment);  
+			transaction.replace(R.id.container, new ConnsListFragment());  
 			transaction.commit();
 		}
 	}
@@ -84,8 +79,6 @@ public class MainActivity extends Activity
     public boolean onOptionsItemSelected(MenuItem item) {
             switch(item.getItemId()) {
             	case R.id.action_settings:
-//            		Toast.makeText(this, "auth_token:" + mAuthToken, Toast.LENGTH_SHORT).show();
-            		
             		Intent i = new Intent(this, PActivity.class);
             		startActivity(i);
             		return true;
@@ -93,17 +86,4 @@ public class MainActivity extends Activity
                 	return super.onOptionsItemSelected(item);
             }
     }
-
-	@Override
-	public void onConnectionSelected(int position) {
-		Toast.makeText(this, "Conns list item clicked (" + position + ")", Toast.LENGTH_SHORT).show();
-		Fragment newFragment = new VMListFragment();  
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();  
-		  
-		transaction.replace(R.id.container, newFragment);  
-		transaction.addToBackStack(null);  
-		  
-		transaction.commit(); 		
-	}
-
 }
