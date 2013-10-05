@@ -127,22 +127,6 @@ public class VMListFragment extends ListFragment {
 	}
 	
 	private void setVMsListAdapter() {
-		/*
-	    String [] strArray = { "hoge", "fuga", "piyo", "fugahoge", "hogefuga",
-	    						"abcdefg", "hijklmn", "opqrstu", "vwxyzzz",
-	    						"mushroom sause", "food education", 
-	    						"charity", "kids sports", "time to chill"};
-	    
-	    mAdapter = new ArrayAdapter<String>(getActivity(),
-	    		  R.layout.vm_list_item_card, R.id.vm_title);
-
-	    for (String str : strArray) {
-	        mAdapter.add(str);
-	    }
-	    
-	    setListAdapter(mAdapter);
-	    */
-		
 		FragmentManager manager = getFragmentManager();  
         final MyProgressDialog pDialog = new MyProgressDialog();  
         pDialog.show(manager, "dialog");  
