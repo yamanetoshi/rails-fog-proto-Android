@@ -15,6 +15,7 @@ public class ShurijpApplication extends Application {
 	
 	private String mAuthToken = "";
 	protected String getAuthToken() { return mAuthToken; }
+	protected void clearAuthToken() { mAuthToken = ""; }
 	
 	private String mURL = "http://cryptic-eyrie-8923.herokuapp.com";
 	protected String getURL() { return mURL; }

@@ -12,17 +12,23 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 
 public class PActivity extends PreferenceActivity {
+	
+	private void returnToHome() {
+		((ShurijpApplication)getApplication()).clearAuthToken();
+		
+    	Intent i = new Intent(this, MainActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(i);		
+	}
 
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction()==KeyEvent.ACTION_DOWN) {
             switch (event.getKeyCode()) {
             	case KeyEvent.KEYCODE_BACK:
-                	Intent i = new Intent(this, MainActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(i);
+            		returnToHome();
 
-                	return true;
+            		return true;
             }
         }
 		return super.dispatchKeyEvent(event);
@@ -44,10 +50,7 @@ public class PActivity extends PreferenceActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
         case android.R.id.home:
-        	Intent i = new Intent(this, MainActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(i);
-
+        	returnToHome();
         	return true;	
         default:
             return super.onOptionsItemSelected(item);
