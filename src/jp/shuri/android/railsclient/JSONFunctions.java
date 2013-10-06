@@ -29,6 +29,7 @@ public class JSONFunctions {
 					throws ClientProtocolException, IOException {
 				switch (response.getStatusLine().getStatusCode()) {
 				case HttpStatus.SC_OK:
+				case HttpStatus.SC_UNAUTHORIZED:
 					return EntityUtils.toString(response.getEntity(), "UTF-8");
 				default:
 					throw new RuntimeException("HTTP Status is " + 
