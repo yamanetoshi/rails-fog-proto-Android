@@ -1,4 +1,4 @@
-package jp.shuri.railsclient;
+package jp.shuri.android.railsclient;
 
 import android.app.Dialog;
 import android.app.DialogFragment;

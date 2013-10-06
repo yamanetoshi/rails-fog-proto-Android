@@ -1,34 +1,20 @@
-package jp.shuri.railsclient;
-
-import java.util.ArrayList;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
+package jp.shuri.android.railsclient;
 
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentManager;
+
 import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 	
 	private SharedPreferences mPref;
 	protected SharedPreferences getPref() { return mPref; }
-	
-	private String mAuthToken = "";
-	protected String getAuthToken() { return mAuthToken; }
-	
-	private final String mURL = "http://cryptic-eyrie-8923.herokuapp.com";
-	protected String getURL() { return mURL; }
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,26 +31,6 @@ public class MainActivity extends Activity {
 			FragmentTransaction transaction = getFragmentManager().beginTransaction();
 			transaction.replace(R.id.container, new ConnsListFragment());  
 			transaction.commit();
-		}
-	}
-	
-	protected void setAuthToken() {
-		ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("email", mPref.getString("login_account", "")));
-		params.add(new BasicNameValuePair("password", mPref.getString("login_password", "")));
-
-		String url = mURL + "/api/users/sign_in";
-
-		try {
-			String str = JSONFunctions.POSTfromURL(url, new DefaultHttpClient(), params);
-			JSONObject obj = new JSONObject(str);
-			mAuthToken = obj.getString("auth_token");
-		} catch (Exception e) {
-			e.printStackTrace();
-
-			FragmentManager manager = getFragmentManager();  
-			final MyExceptionDialog dialog = new MyExceptionDialog();  
-			dialog.show(manager, "dialog");                  	
 		}
 	}
 

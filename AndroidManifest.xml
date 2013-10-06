@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="jp.shuri.railsclient"
+    package="jp.shuri.android.railsclient"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -11,12 +11,13 @@
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
 
     <application
+		android:name="jp.shuri.android.railsclient.ShurijpApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name="jp.shuri.railsclient.MainActivity"
+            android:name="jp.shuri.android.railsclient.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,7 +26,7 @@
             </intent-filter>
         </activity>
         <activity 
-            android:name="jp.shuri.railsclient.PActivity"
+            android:name="jp.shuri.android.railsclient.PActivity"
             android:label="@string/preferences_screen" >
         </activity>
     </application>
