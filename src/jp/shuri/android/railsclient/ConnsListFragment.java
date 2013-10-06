@@ -1,4 +1,4 @@
-package jp.shuri.railsclient;
+package jp.shuri.android.railsclient;
 
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
@@ -27,6 +27,7 @@ public class ConnsListFragment extends ListFragment {
 	protected JSONArray getJSONArray() { return mJsonArray; }
 	
 	private MainActivity getParent() { return ((MainActivity)getActivity()); }
+	private ShurijpApplication getMyApp() { return ((ShurijpApplication)getActivity().getApplication()); }
 	
 	private ArrayAdapter<String> mAdapter;
 	private Handler mHandler = new Handler();
@@ -100,13 +101,25 @@ public class ConnsListFragment extends ListFragment {
 
 			@Override
 			public void run() {
-				if (getParent().getAuthToken().equals("")) {
-					getParent().setAuthToken();
+				if (getMyApp().getAuthToken().equals("")) {
+					try {
+						if (!getMyApp().setAuthToken()) {
+							Intent i = new Intent(getActivity(), PActivity.class);
+							startActivity(i);
+							return;
+						}
+					} catch (Exception e) {
+	                	e.printStackTrace();
+
+	            		FragmentManager manager = getFragmentManager();  
+	                    final MyExceptionDialog dialog = new MyExceptionDialog();  
+	                    dialog.show(manager, "dialog");                  	
+					}
 				}
 				
-				String url = getParent().getURL() + 
+				String url = getMyApp().getURL() + 
 						"/conns.json?auth_token=" + 
-						getParent().getAuthToken();
+						getMyApp().getAuthToken();
                 try {
                 	String str = JSONFunctions.GETfromURL(url, new DefaultHttpClient());
                 	mJsonArray = new JSONArray(str);

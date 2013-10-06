@@ -1,4 +1,4 @@
-package jp.shuri.railsclient;
+package jp.shuri.android.railsclient;
 
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
@@ -11,6 +11,7 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.LayoutInflater;
@@ -31,6 +32,7 @@ public class VMListFragment extends ListFragment {
 	ArrayAdapter<String> mAdapter;
 	
 	private MainActivity getParent() { return ((MainActivity)getActivity()); }
+	private ShurijpApplication getMyApp() { return ((ShurijpApplication)getActivity().getApplication()); }
 
 	private JSONObject mConn = null;
 	private JSONObject mVMs = null;
@@ -135,13 +137,25 @@ public class VMListFragment extends ListFragment {
 
 			@Override
 			public void run() {
-				if (getParent().getAuthToken().equals("")) {
-					getParent().setAuthToken();
+				if (getMyApp().getAuthToken().equals("")) {
+					try {
+						if (!getMyApp().setAuthToken()) {
+							Intent i = new Intent(getActivity(), PActivity.class);
+							startActivity(i);
+							return;
+						}
+					} catch (Exception e) {
+	                	e.printStackTrace();
+
+	            		FragmentManager manager = getFragmentManager();  
+	                    final MyExceptionDialog dialog = new MyExceptionDialog();  
+	                    dialog.show(manager, "dialog");                  	
+					}
 				}
 				
-				String url = getParent().getURL() + 
+				String url = getMyApp().getURL() + 
 						"/vm_operations/" + mIndex + ".json?auth_token=" + 
-						getParent().getAuthToken();
+						getMyApp().getAuthToken();
                 try {
                 	String str = JSONFunctions.GETfromURL(url, new DefaultHttpClient());
                 	JSONObject obj = new JSONObject(str);
