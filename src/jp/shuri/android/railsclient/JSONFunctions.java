@@ -1,4 +1,4 @@
-package jp.shuri.railsclient;
+package jp.shuri.android.railsclient;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,20 +1,37 @@
-package jp.shuri.railsclient;
+package jp.shuri.android.railsclient;
 
 import android.app.ActionBar;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 
+import android.view.KeyEvent;
 import android.view.MenuItem;
 
 public class PActivity extends PreferenceActivity {
-	
-    @Override
+
+	@Override
+	public boolean dispatchKeyEvent(KeyEvent event) {
+        if (event.getAction()==KeyEvent.ACTION_DOWN) {
+            switch (event.getKeyCode()) {
+            	case KeyEvent.KEYCODE_BACK:
+                	Intent i = new Intent(this, MainActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(i);
+
+                	return true;
+            }
+        }
+		return super.dispatchKeyEvent(event);
+	}
+
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		
 		FragmentTransaction transaction = getFragmentManager().beginTransaction();
 		MyPreferenceFragment obj = new MyPreferenceFragment();
 		
@@ -27,8 +44,11 @@ public class PActivity extends PreferenceActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
         case android.R.id.home:
-            finish();
-            return true;
+        	Intent i = new Intent(this, MainActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
+
+        	return true;	
         default:
             return super.onOptionsItemSelected(item);
         }
