@@ -53,7 +53,7 @@ public class VMListFragment extends ListFragment {
                 Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 	public void onClick(DialogInterface dialog, int whichButton) {
                 		dialog.dismiss();
-                		kickoff(true);
+                		kickoff(true, 0);
                 	}
                 });
                 Builder.setCancelable(true);
@@ -68,19 +68,25 @@ public class VMListFragment extends ListFragment {
         }
     }
 	
-    public static class ModifyDialog extends DialogFragment {
+    public class ModifyDialog extends DialogFragment {
+    	private int mPos;
+    	
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-                AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
-                Builder.setTitle("Start/Stop VM");
-                Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                	public void onClick(DialogInterface dialog, int whichButton) {
-                		dialog.dismiss();
-                	}
-                });
-                Builder.setCancelable(true);
+    	    Bundle args = getArguments();
+            mPos = args.getInt("pos");
 
-                return Builder.create();
+        	AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
+        	Builder.setTitle("Start/Stop VM");
+        	Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			dialog.dismiss();
+        			kickoff(false, mPos);
+        		}
+        	});
+        	Builder.setCancelable(true);
+
+        	return Builder.create();
         }
 
         @Override
@@ -90,7 +96,7 @@ public class VMListFragment extends ListFragment {
         }
     }
     
-    private void kickoff(final boolean isNew) {
+    private void kickoff(final boolean isNew, final int pos) {
 		FragmentManager manager = getFragmentManager();  
         final MyProgressDialog pDialog = new MyProgressDialog();
         pDialog.show(manager, "dialog");  
@@ -121,13 +127,32 @@ public class VMListFragment extends ListFragment {
                         params.add(new BasicNameValuePair("hostname", ""));
 
         				String url = getMyApp().getURL() + 
-        						"/vm_operations?auth_token=" + 
+        						"/vm_operations.json?auth_token=" + 
         						getMyApp().getAuthToken();
-                		String str = JSONFunctions.POSTfromURL(url, new DefaultHttpClient(), params);
-        				pDialog.dismiss();
+                		JSONFunctions.POSTfromURL(url, new DefaultHttpClient(), params);
                 	} else {
-                		
+                    	JSONArray tmpArray = mVMs.getJSONObject("listvirtualmachinesresponse")
+    							.getJSONArray("virtualmachine");
+                		JSONObject e = tmpArray.getJSONObject(pos);
+                		String id = e.getString("id");
+                		String state = e.getString("state").equals("Running") ? "stop" : "start";
+
+                		String url = getMyApp().getURL() +
+                				"/vm_operations/" + id + "/" + state + ".json?auth_token=" +
+                				getMyApp().getAuthToken();
+                		JSONFunctions.GETfromURL(url, new DefaultHttpClient());
                 	}
+                	
+    				pDialog.dismiss();
+    				mHandler.post(new Runnable() {
+
+						@Override
+						public void run() {
+			        		setListAdapter(null);
+			        		setVMsListAdapter();
+						}
+    					
+    				});
                 } catch (Exception e) {
                 	e.printStackTrace();
 
@@ -174,9 +199,38 @@ public class VMListFragment extends ListFragment {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view, int position,
 					long id) {
-                FragmentManager manager = getFragmentManager();  
-                ModifyDialog alertDialog = new ModifyDialog();
-                alertDialog.show(manager, "dialog");
+				String state = "";
+				try {
+					JSONArray tmpArray = mVMs.getJSONObject("listvirtualmachinesresponse")
+							.getJSONArray("virtualmachine");
+					JSONObject e = tmpArray.getJSONObject((int)id);
+					state = e.getString("state");
+				} catch (Exception e) {
+                	e.printStackTrace();
+
+            		FragmentManager manager = getFragmentManager();  
+                    final MyExceptionDialog dialog = new MyExceptionDialog();  
+                    dialog.show(manager, "dialog");                  	
+				}
+				
+				if (state.equals("Running") || state.equals("Stopped")) {
+
+					FragmentManager manager = getFragmentManager();  
+					ModifyDialog alertDialog = new ModifyDialog();
+                
+					Bundle args = new Bundle();
+					args.putInt("pos", (int)id);
+					if (state.equals("Running")) {
+						args.putString("state", "stop");
+					} else {
+						args.putString("state", "start");
+					}
+					alertDialog.setArguments(args);
+                
+					alertDialog.show(manager, "dialog");
+				} else {
+					Toast.makeText(getActivity(), "can not perform this operation", Toast.LENGTH_SHORT).show();
+				}
 			}
 	    	
 	    });
