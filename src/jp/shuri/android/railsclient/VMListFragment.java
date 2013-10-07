@@ -75,9 +75,11 @@ public class VMListFragment extends ListFragment {
         public Dialog onCreateDialog(Bundle savedInstanceState) {
     	    Bundle args = getArguments();
             mPos = args.getInt("pos");
+            String str = args.getString("state");
 
         	AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
-        	Builder.setTitle("Start/Stop VM");
+        	
+        	Builder.setTitle(str + " VM");
         	Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
         			dialog.dismiss();
@@ -221,9 +223,9 @@ public class VMListFragment extends ListFragment {
 					Bundle args = new Bundle();
 					args.putInt("pos", (int)id);
 					if (state.equals("Running")) {
-						args.putString("state", "stop");
+						args.putString("state", "Stop");
 					} else {
-						args.putString("state", "start");
+						args.putString("state", "Start");
 					}
 					alertDialog.setArguments(args);
                 
