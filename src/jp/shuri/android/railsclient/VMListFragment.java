@@ -63,6 +63,14 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
                 		obj.kickoff(true, 0);
                 	}
                 });
+                Builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						dialog.dismiss();
+					}
+                	
+                });
                 Builder.setCancelable(true);
 
                 return Builder.create();
@@ -99,6 +107,14 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
             		obj.kickoff(false, mPos);
         		}
         	});
+            Builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+				@Override
+				public void onClick(DialogInterface dialog, int whichButton) {
+					dialog.dismiss();
+				}
+            	
+            });
         	Builder.setCancelable(true);
 
         	return Builder.create();
