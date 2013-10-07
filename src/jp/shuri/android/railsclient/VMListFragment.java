@@ -1,6 +1,10 @@
 package jp.shuri.android.railsclient;
 
+import java.util.ArrayList;
+
+import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -14,6 +18,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,7 +45,7 @@ public class VMListFragment extends ListFragment {
 	private final int RELOAD_ID = 0xdeadbeef;
 	private final int ADD_ID = 0xdeadbeef + 1;
 	
-    public static class AddDialog extends DialogFragment {
+    public class AddDialog extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
                 AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
@@ -48,6 +53,7 @@ public class VMListFragment extends ListFragment {
                 Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 	public void onClick(DialogInterface dialog, int whichButton) {
                 		dialog.dismiss();
+                		kickoff(true);
                 	}
                 });
                 Builder.setCancelable(true);
@@ -82,6 +88,56 @@ public class VMListFragment extends ListFragment {
                 super.onActivityCreated(savedInstanceState);
                 getDialog().setCanceledOnTouchOutside(false);
         }
+    }
+    
+    private void kickoff(final boolean isNew) {
+		FragmentManager manager = getFragmentManager();  
+        final MyProgressDialog pDialog = new MyProgressDialog();
+        pDialog.show(manager, "dialog");  
+        
+        new Thread(new Runnable() {
+
+			@Override
+			public void run() {
+				if (getMyApp().getAuthToken().equals("")) {
+					try {
+						if (!getMyApp().setAuthToken()) {
+							Intent i = new Intent(getActivity(), PActivity.class);
+							startActivity(i);
+							return;
+						}
+					} catch (Exception e) {
+	                	e.printStackTrace();
+
+	            		FragmentManager manager = getFragmentManager();  
+	                    final MyExceptionDialog dialog = new MyExceptionDialog();  
+	                    dialog.show(manager, "dialog");                  	
+					}
+				}
+				
+                try {
+                	if (isNew) {
+                        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+                        params.add(new BasicNameValuePair("hostname", ""));
+
+        				String url = getMyApp().getURL() + 
+        						"/vm_operations?auth_token=" + 
+        						getMyApp().getAuthToken();
+                		String str = JSONFunctions.POSTfromURL(url, new DefaultHttpClient(), params);
+        				pDialog.dismiss();
+                	} else {
+                		
+                	}
+                } catch (Exception e) {
+                	e.printStackTrace();
+
+            		FragmentManager manager = getFragmentManager();  
+                    final MyExceptionDialog dialog = new MyExceptionDialog();  
+                    dialog.show(manager, "dialog");                  	
+                }
+
+			}
+        }).start();
     }
 	
 	@Override
