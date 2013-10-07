@@ -12,6 +12,7 @@ import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ListFragment;
 import android.content.DialogInterface;
@@ -30,7 +31,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-public class VMListFragment extends ListFragment {
+public class VMListFragment extends ListFragment implements IVMListFragment {
 	private Handler mHandler = new Handler();
 	private int mIndex;
 	
@@ -45,7 +46,12 @@ public class VMListFragment extends ListFragment {
 	private final int RELOAD_ID = 0xdeadbeef;
 	private final int ADD_ID = 0xdeadbeef + 1;
 	
-    public class AddDialog extends DialogFragment {
+    public static class AddDialog extends DialogFragment {
+    	public AddDialog() {}
+    	public AddDialog(IVMListFragment obj) {
+    		setTargetFragment((Fragment)obj, 0);
+    	}
+    	
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
                 AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
@@ -53,7 +59,8 @@ public class VMListFragment extends ListFragment {
                 Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                 	public void onClick(DialogInterface dialog, int whichButton) {
                 		dialog.dismiss();
-                		kickoff(true, 0);
+                		IVMListFragment obj = (IVMListFragment)getTargetFragment();
+                		obj.kickoff(true, 0);
                 	}
                 });
                 Builder.setCancelable(true);
@@ -68,8 +75,13 @@ public class VMListFragment extends ListFragment {
         }
     }
 	
-    public class ModifyDialog extends DialogFragment {
+    public static class ModifyDialog extends DialogFragment {
     	private int mPos;
+    	
+    	public ModifyDialog() {}
+    	public ModifyDialog(IVMListFragment obj) {
+    		setTargetFragment((Fragment)obj, 0);
+    	}
     	
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -83,7 +95,8 @@ public class VMListFragment extends ListFragment {
         	Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
         			dialog.dismiss();
-        			kickoff(false, mPos);
+            		IVMListFragment obj = (IVMListFragment)getTargetFragment();
+            		obj.kickoff(false, mPos);
         		}
         	});
         	Builder.setCancelable(true);
@@ -98,7 +111,7 @@ public class VMListFragment extends ListFragment {
         }
     }
     
-    private void kickoff(final boolean isNew, final int pos) {
+    public void kickoff(final boolean isNew, final int pos) {
 		FragmentManager manager = getFragmentManager();  
         final MyProgressDialog pDialog = new MyProgressDialog();
         pDialog.show(manager, "dialog");  
@@ -218,7 +231,7 @@ public class VMListFragment extends ListFragment {
 				if (state.equals("Running") || state.equals("Stopped")) {
 
 					FragmentManager manager = getFragmentManager();  
-					ModifyDialog alertDialog = new ModifyDialog();
+					ModifyDialog alertDialog = new ModifyDialog(VMListFragment.this);
                 
 					Bundle args = new Bundle();
 					args.putInt("pos", (int)id);
@@ -324,7 +337,7 @@ public class VMListFragment extends ListFragment {
         		return true;
         	case ADD_ID:
                 FragmentManager manager = getFragmentManager();  
-                AddDialog alertDialog = new AddDialog();
+                AddDialog alertDialog = new AddDialog(this);
                 alertDialog.show(manager, "dialog");
 
                 return true;
