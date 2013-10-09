@@ -208,7 +208,6 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
 	    
 	    Bundle args = getArguments();
         mIndex = args.getInt("pos");
-        Toast.makeText(getActivity(), "selected : " + mIndex, Toast.LENGTH_SHORT).show();
 
 	    ActionBar actionBar = getActivity().getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -260,7 +259,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
                 
 					alertDialog.show(manager, "dialog");
 				} else {
-					Toast.makeText(getActivity(), "can not perform this operation", Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), "You can not perform this operation", Toast.LENGTH_SHORT).show();
 				}
 			}
 	    	
