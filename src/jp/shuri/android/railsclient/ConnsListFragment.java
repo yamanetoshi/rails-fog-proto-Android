@@ -93,10 +93,7 @@ public class ConnsListFragment extends ListFragment {
 	}
 	
 	private void setConnsListAdapter() {
-		FragmentManager manager = getFragmentManager();  
-        final MyProgressDialog pDialog = new MyProgressDialog();  
-        pDialog.show(manager, "dialog");  
-        
+
         new Thread(new Runnable() {
 
 			@Override
@@ -142,7 +139,6 @@ public class ConnsListFragment extends ListFragment {
                 		
                 	});
         			
-                	pDialog.dismiss();
                 } catch (Exception e) {
                 	e.printStackTrace();
 

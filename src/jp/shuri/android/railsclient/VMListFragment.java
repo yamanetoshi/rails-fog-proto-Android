@@ -265,7 +265,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
 			}
 	    	
 	    });
-	    
+	    setListShownNoAnimation(true);
 	    setVMsListAdapter();
 	}
 	
