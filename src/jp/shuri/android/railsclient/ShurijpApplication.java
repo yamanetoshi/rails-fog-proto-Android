@@ -7,6 +7,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONObject;
 
+import com.deploygate.sdk.DeployGate;
+
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -41,6 +43,7 @@ public class ShurijpApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		
+		DeployGate.install(this);
 		mPref = PreferenceManager.getDefaultSharedPreferences(this);
 	}
 
