@@ -25,9 +25,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -53,6 +56,8 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
 		}
 	
     public static class AddDialog extends DialogFragment {
+    	private EditText mEditText;
+    	
     	public AddDialog() {}
     	public AddDialog(IVMListFragment obj) {
     		setTargetFragment((Fragment)obj, 0);
@@ -60,26 +65,31 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
     	
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
-                AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
-                Builder.setTitle("Add New Item");
-                Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                	public void onClick(DialogInterface dialog, int whichButton) {
-                		dialog.dismiss();
-                		IVMListFragment obj = (IVMListFragment)getTargetFragment();
-                		obj.kickoff(true, 0, Operation.NOOP);
-                	}
-                });
-                Builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        	mEditText = new EditText(getActivity());
+        	AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
+        	Builder.setTitle("Add New VM");
+        	Builder.setView(mEditText);
+        	Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			dialog.dismiss();
+        			IVMListFragment obj = (IVMListFragment)getTargetFragment();
+        			obj.kickoff(true, 0, Operation.NOOP, mEditText.getText().toString());
+        		}
+        	});
+        	Builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-					@Override
-					public void onClick(DialogInterface dialog, int whichButton) {
-						dialog.dismiss();
-					}
-                	
-                });
-                Builder.setCancelable(true);
+        		@Override
+        		public void onClick(DialogInterface dialog, int whichButton) {
+        			dialog.dismiss();
+        		}
 
-                return Builder.create();
+        	});
+        	Builder.setCancelable(true);
+
+        	final AlertDialog ret = Builder.create();
+        	ret.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+
+        	return ret;
         }
 
         @Override
@@ -137,7 +147,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
             				mOpe = Operation.REBOOT;
             			}
             		}
-            		obj.kickoff(false, mPos, mOpe);
+            		obj.kickoff(false, mPos, mOpe, "");
         		}
         	});
             Builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -160,7 +170,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
         }
     }
     
-    public void kickoff(final boolean isNew, final int pos, final Operation ope) {
+    public void kickoff(final boolean isNew, final int pos, final Operation ope, final String hostname) {
 		FragmentManager manager = getFragmentManager();  
         final MyProgressDialog pDialog = new MyProgressDialog();
         pDialog.show(manager, "dialog");  
@@ -188,7 +198,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
                 try {
                 	if (isNew) {
                         ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-                        params.add(new BasicNameValuePair("hostname", ""));
+                        params.add(new BasicNameValuePair("hostname", hostname));
 
         				String url = getMyApp().getURL() + 
         						"/vm_operations.json?auth_token=" + 
