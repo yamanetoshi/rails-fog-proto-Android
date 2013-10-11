@@ -46,6 +46,12 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
 	private final int RELOAD_ID = 0xdeadbeef;
 	private final int ADD_ID = 0xdeadbeef + 1;
 	
+	protected enum Operation { NOOP,
+		START, 
+		STOP, 
+		REBOOT, 
+		}
+	
     public static class AddDialog extends DialogFragment {
     	public AddDialog() {}
     	public AddDialog(IVMListFragment obj) {
@@ -60,7 +66,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
                 	public void onClick(DialogInterface dialog, int whichButton) {
                 		dialog.dismiss();
                 		IVMListFragment obj = (IVMListFragment)getTargetFragment();
-                		obj.kickoff(true, 0);
+                		obj.kickoff(true, 0, Operation.NOOP);
                 	}
                 });
                 Builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -85,9 +91,13 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
 	
     public static class ModifyDialog extends DialogFragment {
     	private int mPos;
+    	private Operation mOpe;
+    	private final CharSequence[] mItems = {"Stop", "Reboot"};
+    	private int mSelect = 0;
     	
     	public ModifyDialog() {}
     	public ModifyDialog(IVMListFragment obj) {
+    		mOpe = Operation.STOP;
     		setTargetFragment((Fragment)obj, 0);
     	}
     	
@@ -96,15 +106,38 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
     	    Bundle args = getArguments();
             mPos = args.getInt("pos");
             String str = args.getString("state");
+            if (str.equals("Stopped")) {
+            	str = "Start";
+            	mOpe = Operation.START;
+            } else {
+            	str = "Stop/Reboot";
+            }
 
         	AlertDialog.Builder Builder = new AlertDialog.Builder(getActivity());
         	
         	Builder.setTitle(str + " VM");
+        	if (mOpe != Operation.START) {
+        		Builder.setSingleChoiceItems(mItems, 0, new DialogInterface.OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface arg0, int arg1) {
+						mSelect = arg1;
+					}
+        		});
+        	}
+        	
         	Builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
         		public void onClick(DialogInterface dialog, int whichButton) {
         			dialog.dismiss();
             		IVMListFragment obj = (IVMListFragment)getTargetFragment();
-            		obj.kickoff(false, mPos);
+            		if (mOpe != Operation.START){
+            			if (mSelect == 0) {
+            				mOpe = Operation.STOP;
+            			} else {
+            				mOpe = Operation.REBOOT;
+            			}
+            		}
+            		obj.kickoff(false, mPos, mOpe);
         		}
         	});
             Builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -127,7 +160,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
         }
     }
     
-    public void kickoff(final boolean isNew, final int pos) {
+    public void kickoff(final boolean isNew, final int pos, final Operation ope) {
 		FragmentManager manager = getFragmentManager();  
         final MyProgressDialog pDialog = new MyProgressDialog();
         pDialog.show(manager, "dialog");  
@@ -166,7 +199,20 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
     							.getJSONArray("virtualmachine");
                 		JSONObject e = tmpArray.getJSONObject(pos);
                 		String id = e.getString("id");
-                		String state = e.getString("state").equals("Running") ? "stop" : "start";
+
+                		String state = "";
+                		switch (ope) {
+                		case START:
+                			state = "start";
+                			break;
+                		case STOP:
+                			state = "stop";
+                			break;
+                		case REBOOT:
+                			state = "reboot";
+                			break;
+                		default:
+                		}
 
                 		String url = getMyApp().getURL() +
                 				"/vm_operations/" + id + "/" + state + ".json?auth_token=" +
@@ -250,11 +296,7 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
                 
 					Bundle args = new Bundle();
 					args.putInt("pos", (int)id);
-					if (state.equals("Running")) {
-						args.putString("state", "Stop");
-					} else {
-						args.putString("state", "Start");
-					}
+					args.putString("state", state);
 					alertDialog.setArguments(args);
                 
 					alertDialog.show(manager, "dialog");
