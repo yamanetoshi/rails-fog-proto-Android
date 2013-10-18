@@ -15,8 +15,22 @@
       		android:id="@+id/vm_title"
       		android:layout_width="wrap_content"
       		android:layout_height="wrap_content"
-      		android:textColor="#666666"/>
-    	
+      		android:textColor="#666666"
+      		android:layout_alignParentLeft="true"
+		    android:layout_alignParentTop="true"
+      		
+      		/>
+    	<TextView 
+    	    android:id="@+id/vm_state"
+      		android:layout_width="wrap_content"
+      		android:layout_height="wrap_content"
+      		android:textColor="#666666"
+    	    android:layout_below="@+id/vm_title"
+    	    android:layout_marginTop="4dip"
+    	    android:layout_alignParentRight="true"
+    	    android:textSize="12sp"
+    	    />
+    		
   	</RelativeLayout>
   	
   	<View
