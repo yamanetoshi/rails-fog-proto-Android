@@ -15,7 +15,10 @@
       		android:id="@+id/conns_title"
       		android:layout_width="wrap_content"
       		android:layout_height="wrap_content"
-      		android:textColor="#666666"/>
+      		android:textColor="#666666"
+      		android:layout_alignParentLeft="true"
+		    android:layout_alignParentTop="true"
+      		/>
     	
   	</RelativeLayout>
   	
