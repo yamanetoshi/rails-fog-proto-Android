@@ -15,6 +15,7 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ListFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,19 +27,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class VMListFragment extends ListFragment implements IVMListFragment {
 	private Handler mHandler = new Handler();
 	private int mIndex;
 	
-	ArrayAdapter<String> mAdapter;
+	VMInfoAdapter mAdapter;
 	
 	private MainActivity getParent() { return ((MainActivity)getActivity()); }
 	private ShurijpApplication getMyApp() { return ((ShurijpApplication)getActivity().getApplication()); }
@@ -49,11 +52,59 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
 	private final int RELOAD_ID = 0xdeadbeef;
 	private final int ADD_ID = 0xdeadbeef + 1;
 	
+	private VMInfo[] mVMInfoArray;
+	
 	protected enum Operation { NOOP,
 		START, 
 		STOP, 
 		REBOOT, 
 		}
+	
+	private class VMInfo {
+		private String mName;
+		private String mState;
+		
+		public VMInfo() {
+			mName = "";
+			mState = "";
+		}
+		
+		public VMInfo(String name, String state) {
+			mName = name;
+			mState = state;
+		}
+		
+		public String getState() { return mState; }
+		public String getName() { return mName; }
+	}
+	
+	private class VMInfoAdapter extends ArrayAdapter<VMInfo> {
+        private VMInfo [] mItems;
+        private LayoutInflater     mInflater;
+ 
+        public VMInfoAdapter(Context context, int resourceId,
+                VMInfo[] items) {
+            super(context, resourceId, items);
+            this.mItems = items;
+            this.mInflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
+ 
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View view = convertView;
+            if (view == null) {
+                view = mInflater.inflate(R.layout.vm_list_item_card, null);
+            }
+            VMInfo item = mItems[position];
+            TextView textView = (TextView) view
+                    .findViewById(R.id.vm_title);
+            textView.setText(item.getName());
+            textView = (TextView)view.findViewById(R.id.vm_state);
+            textView.setText(item.getState());
+            return view;
+        }
+	}
 	
     public static class AddDialog extends DialogFragment {
     	private EditText mEditText;
@@ -355,15 +406,14 @@ public class VMListFragment extends ListFragment implements IVMListFragment {
                 	mVMs = obj.getJSONObject("vms");
                 	JSONArray tmpArray = mVMs.getJSONObject("listvirtualmachinesresponse")
                 							.getJSONArray("virtualmachine");
-            	    
-            	    mAdapter = new ArrayAdapter<String>(getActivity(),
-            	    		  R.layout.vm_list_item_card, R.id.vm_title);
 
+                	mVMInfoArray = new VMInfo[tmpArray.length()];
                 	for (int i = 0; i < tmpArray.length(); i++) {
                 		JSONObject e = tmpArray.getJSONObject(i);
-                		mAdapter.add(e.getString("displayname"));
+                		mVMInfoArray[i] = new VMInfo(e.getString("displayname"), e.getString("state"));
                 	}
-
+                	mAdapter = new VMInfoAdapter(getActivity(), R.layout.vm_list_item_card, mVMInfoArray);
+                	
                 	mHandler.post(new Runnable() {
 
 						@Override
